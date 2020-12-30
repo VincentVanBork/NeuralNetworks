@@ -7,7 +7,7 @@ def ReLu(x):
     return np.maximum(0,x)
 
 def ReLu_prime(x):
-    x[x<=0] = 0
+    x[x<=0] = 0.001
     x[x>0] = 1
     return x
     # return np.where(x > 0, 1, 0)
@@ -16,18 +16,20 @@ def ReLu_prime(x):
 def softmax(sth, x):
     print("softmax predicted ",sth)
     print("softmax real",x)
-    e_x = np.exp(x - np.max(x))
-    val = e_x / e_x.sum(axis=0)
-    return val
+    nominator = np.exp(x-np.max(x))
+    denominator = np.exp(x-np.max(x)).sum()
+    return nominator/denominator
 
 def softmax_prime(sth, x):
     """true and predicted"""
     print("TRUE SHAPE ", sth.shape, sth)
     print("PREDICTED SHAPE  ",x.shape,x )
-    x = x + 1e-10
+    x = x + 1e-8
     # weird = np.log(x)
-    # problem = -sth.reshape((1,-1))*np.log(x)
-    return -sth.reshape((1,-1))*np.log(x)
+    problem = sth.reshape((1,-1))
+
+    val = problem*np.log(x)
+    return val
 
 class Layer:
     def __init__(self):
