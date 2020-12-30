@@ -7,29 +7,43 @@ def ReLu(x):
     return np.maximum(0,x)
 
 def ReLu_prime(x):
-    x[x<=0] = 0.001
+    x[x<=0] = 0.00001
     x[x>0] = 1
     return x
     # return np.where(x > 0, 1, 0)
-
-
-def softmax(sth, x):
-    print("softmax predicted ",sth)
-    print("softmax real",x)
+def softmax_vec(x):
+    # print("softmax real",x)
     nominator = np.exp(x-np.max(x))
     denominator = np.exp(x-np.max(x)).sum()
     return nominator/denominator
 
-def softmax_prime(sth, x):
-    """true and predicted"""
-    print("TRUE SHAPE ", sth.shape, sth)
-    print("PREDICTED SHAPE  ",x.shape,x )
-    x = x + 1e-8
-    # weird = np.log(x)
-    problem = sth.reshape((1,-1))
+def softmax_vec_prime(x, err):
+    print("softmax real",x)
+    print("softmax err",err)
+    return x-err
 
-    val = problem*np.log(x)
+def softmax(sth, x):
+    # print("softmax predicted ",sth)
+    # print("softmax real",x)
+    nominator = np.exp(x-np.max(x))
+    denominator = np.exp(x-np.max(x)).sum()
+    return nominator/denominator
+
+def softmax_prime(true, predicted):
+    """true and predicted"""
+    predicted = predicted + 1e-8
+    # weird = np.log(x)
+    true_values = true.reshape((1,-1))
+    val = -true_values*np.log(predicted)
+    # print("BACK SOFTMAX", val)
     return val
+    # print("SOFTMAEX", predicted)
+    # indices = np.argmax(true, axis=1).astype(int)
+    # predicted_probability = predicted[np.arange(len(predicted)), indices]
+    # log_predictions = np.log(predicted_probability)
+    # loss = -1.0 * np.sum(log_predictions) / len(log_predictions)
+    # return loss
+
 
 class Layer:
     def __init__(self):
@@ -68,7 +82,8 @@ class FCLayer(Layer):
     # output_size = number of output neurons
     def __init__(self, input_size, output_size):
         self.weights = np.random.rand(input_size, output_size) - 0.5
-        self.bias = np.random.rand(1, output_size) - 0.5
+        # self.bias = np.random.rand(1, output_size) - 0.5
+        self.bias = np.zeros((1,output_size))
 
     # returns output for a given input
     def forward_propagation(self, input_data):
@@ -79,7 +94,7 @@ class FCLayer(Layer):
     # computes dE/dW, dE/dB for a given output_error=dE/dY. Returns input_error=dE/dX.
     def backward_propagation(self, output_error, learning_rate):
         input_error = np.dot(output_error, self.weights.T)
-
+        #TODO ech meh
         weights_error = np.dot(self.input.T.reshape((-1,1)), output_error)
         # dBias = output_error
 
@@ -88,6 +103,24 @@ class FCLayer(Layer):
         self.bias -= learning_rate * output_error
         return input_error
 
+
+class OutputLayer(Layer):
+    def __init__(self, activation, activation_prime):
+            self.activation = activation
+            self.activation_prime = activation_prime
+
+    # returns the activated input
+    def forward_propagation(self, input_data):
+        self.input = input_data
+        self.output = self.activation(self.input)
+        # print("OUTPUT", self.output, "SUM", self.output.sum())
+        return self.output
+
+    # Returns input_error=dE/dX for a given output_error=dE/dY.
+    # learning_rate is not used because there is no "learnable" parameters.
+    def backward_propagation(self, output_error, learning_rate):
+        # print("INPUT", self.input, "INPUT_SUM", self.output.sum())
+        return self.activation_prime(self.input, output_error)
 
 class Network:
     def __init__(self):
@@ -127,7 +160,7 @@ class Network:
 
         # training loop
         for i in range(epochs):
-            err = 0
+            error = 0
             for j in range(samples):
                 # forward propagation
                 output = x_train[j]
@@ -135,17 +168,22 @@ class Network:
                     output = layer.forward_propagation(output)
 
                 # compute loss (for display purpose only)
-                err += self.loss(y_train[j], output)
+                # err += self.loss(y_train[j], output)
 
                 # backward propagation
                 error = self.loss_prime(y_train[j], output)
                 for layer in reversed(self.layers):
                     error = layer.backward_propagation(error, learning_rate)
+                    # print("LAYER", layer)
+                    # print("---------------")
+                    # print("OUTPUT",layer.output)
+                    # print("---------------")
+                    # print("EERROR", error)
 
             # calculate average error on all samples
-            err /= samples
+            error /= samples
             # print('epoch %d/%d   error=%f' % (i+1, epochs, err))
-            print('epoch', epochs, "errpr", err)
+            # print('epoch', epochs, "errpr", error)
 
 if __name__ == "__main__":
     ...
