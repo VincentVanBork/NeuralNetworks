@@ -5,8 +5,9 @@ from tensorflow.keras import Model
 
 mnist = tf.keras.datasets.mnist
 (x_train, y_train), (x_test, y_test) = mnist.load_data()
+#color rgb is 255
 x_train, x_test = x_train / 255.0, x_test / 255.0
-
+#unpack with new axis
 x_train = x_train[..., tf.newaxis].astype("float32")
 x_test = x_test[..., tf.newaxis].astype("float32")
 
@@ -16,18 +17,19 @@ train_ds = tf.data.Dataset.from_tensor_slices(
 test_ds = tf.data.Dataset.from_tensor_slices((x_test, y_test)).batch(32)
 
 class MyModel(Model):
-  def __init__(self):
-    super(MyModel, self).__init__()
-    self.conv1 = Conv2D(32, 3, activation='relu')
-    self.flatten = Flatten()
-    self.d1 = Dense(128, activation='relu')
-    self.d2 = Dense(10)
+    def __init__(self):
+        super(MyModel, self).__init__()
 
-  def call(self, x):
-    x = self.conv1(x)
-    x = self.flatten(x)
-    x = self.d1(x)
-    return self.d2(x)
+        self.conv1 = Conv2D(32, 3, activation='relu')
+        self.flatten = Flatten()
+        self.d1 = Dense(128, activation='relu')
+        self.d2 = Dense(10)
+
+    def call(self, x):
+        x = self.conv1(x)
+        x = self.flatten(x)
+        x = self.d1(x)
+        return self.d2(x)
 
 # Create an instance of the model
 model = MyModel()
@@ -46,27 +48,28 @@ test_accuracy = tf.keras.metrics.SparseCategoricalAccuracy(name='test_accuracy')
 
 @tf.function
 def train_step(images, labels):
-  with tf.GradientTape() as tape:
-    # training=True is only needed if there are layers with different
-    # behavior during training versus inference (e.g. Dropout).
-    predictions = model(images, training=True)
-    loss = loss_object(labels, predictions)
-  gradients = tape.gradient(loss, model.trainable_variables)
-  optimizer.apply_gradients(zip(gradients, model.trainable_variables))
+    with tf.GradientTape() as tape:
+        #recording gradients
+        # training=True is only needed if there are layers with different
+        # behavior during training versus inference (e.g. Dropout).
+        predictions = model(images, training=True)
+        loss = loss_object(labels, predictions)
+    gradients = tape.gradient(loss, model.trainable_variables)
+    optimizer.apply_gradients(zip(gradients, model.trainable_variables))
 
-  train_loss(loss)
-  train_accuracy(labels, predictions)
+    train_loss(loss)
+    train_accuracy(labels, predictions)
 
 
 @tf.function
 def test_step(images, labels):
-  # training=False is only needed if there are layers with different
-  # behavior during training versus inference (e.g. Dropout).
-  predictions = model(images, training=False)
-  t_loss = loss_object(labels, predictions)
+    # training=False is only needed if there are layers with different
+    # behavior during training versus inference (e.g. Dropout).
+    predictions = model(images, training=False)
+    t_loss = loss_object(labels, predictions)
 
-  test_loss(t_loss)
-  test_accuracy(labels, predictions)
+    test_loss(t_loss)
+    test_accuracy(labels, predictions)
 
 
 if __name__ == "__main__":
