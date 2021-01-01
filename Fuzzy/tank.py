@@ -4,10 +4,10 @@ class Tank:
     def __init__(self, ID):
         self.clientID = ID
         # get handles to robot drivers
-        err_code, self.left_front_handle =  vrep.simxGetObjectHandle(self.clientID,'left_front', vrep.simx_opmode_blocking)
-        err_code, self.left_back_handle  =  vrep.simxGetObjectHandle(self.clientID,'left_back', vrep.simx_opmode_blocking)
-        err_code, self.right_back_handle =  vrep.simxGetObjectHandle(self.clientID,'right_back', vrep.simx_opmode_blocking)
-        err_code, self.right_front_handle=  vrep.simxGetObjectHandle(self.clientID,'right_front', vrep.simx_opmode_blocking)
+        err_code, self.left_front_handle =  vrep.simxGetObjectHandle(self.clientID,'left_front#0', vrep.simx_opmode_blocking)
+        err_code, self.left_back_handle  =  vrep.simxGetObjectHandle(self.clientID,'left_back#0', vrep.simx_opmode_blocking)
+        err_code, self.right_back_handle =  vrep.simxGetObjectHandle(self.clientID,'right_back#0', vrep.simx_opmode_blocking)
+        err_code, self.right_front_handle=  vrep.simxGetObjectHandle(self.clientID,'right_front#0', vrep.simx_opmode_blocking)
         
         self.side_handles=[]
         for l in 'rl':
