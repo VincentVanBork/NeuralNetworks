@@ -33,32 +33,35 @@ def softmax(x, axis=None):
     return y / y.sum(axis=axis, keepdims=True)
 
 def softmax_prime(x,axis=None):
-    print(x)
-    array_final = []
-    array_semi = []
-    # for index_i,i in enumerate(x[0]):
-    #     for index_j, j in enumerate(x[0]):
-    #         if index_j == index_i:
-    #             array_semi.append(i*(1-j))
-    #         else:
-    #             array_semi.append((-i*j))
-    #     array_final.append(array_semi)
-    #TODO MIGHT HAVE MISTAKE with np where many values are the same or sth
-
-    return np.array([ [np.array([[(i*(1-j)) if index_j == index_i else (-i*j) for index_j, j in enumerate(x[0])]]).sum() for index_i, i in enumerate(x[0]) ] ])
+    return np.array([ 
+            [
+                np.array([
+                    [
+                        (i*(1-j)) if index_j == index_i else (-i*j) \
+                        for index_j, j in enumerate(x[0])
+                    ]
+                ]).sum()\
+                for index_i, i in enumerate(x[0]) 
+            ] 
+        ])
         
 
 def cross_entropy_loss(true, predicted):
-    predicted = predicted + 1e-6
+    predicted += 1e-8
     err =  true * -1*np.log(predicted)
     return err
 
+
+def cross_entropy_loss_prime(true, predicted):
+    return predicted - true
+
 if __name__ == "__main__":
-    M = np.array([[1,0,0],[0,1,0],[0,0,1]])
-    x = np.array([[-0.09056757,  1.52774372,  1.82126822]])
-    # print(np.subtract(M,y))
-    for i in x[0]:
-        print(np.array([[i*(1-j) if i==j else -i*j for j in x[0]]]).sum())
+    ...
+    # M = np.array([[1,0,0],[0,1,0],[0,0,1]])
+    # x = np.array([[-0.09056757,  1.52774372,  1.82126822]])
+    # # print(np.subtract(M,y))
+    # for i in x[0]:
+    #     print(np.array([[i*(1-j) if i==j else -i*j for j in x[0]]]).sum())
     
     # x:np.array = np.array([[0.276935,1.6428,1.5411]])
     # # print(x)
